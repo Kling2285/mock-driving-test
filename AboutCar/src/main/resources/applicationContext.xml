@@ -54,8 +54,8 @@
     <bean id="javaMailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
         <property name="host" value="smtp.163.com"/>
         <property name="port" value="25"/>
-        <property name="username" value="17880292285@163.com"/>
-        <property name="password" value="WWymmmYVsrtwWiq5"/>
+        <property name="username" value="@163.com"/>
+        <property name="password" value=""/>
         <property name="javaMailProperties">
             <props>
                 <prop key="mail.smtp.ssl.enable">false</prop>
