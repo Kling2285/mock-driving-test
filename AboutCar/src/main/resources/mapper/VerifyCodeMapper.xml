@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 命名空间必须与 Mapper 接口全类名完全一致 -->
+<mapper namespace="com.example.mapper.VerifyCodeMapper">
+
+    <!-- 结果集映射：数据库下划线字段 ↔ 实体类驼峰字段 -->
+    <resultMap id="VerifyCodeResultMap" type="com.example.entity.VerifyCode">
+        <id column="id" property="id" />
+        <result column="email" property="email"/>
+        <result column="code" property="code"/>
+        <result column="expire_time" property="expireTime" />
+        <result column="create_time" property="createTime"/>
+        <result column="used" property="used" />
+    </resultMap>
+
+    <!-- 1. 新增验证码：主键自增并回填到实体类 -->
+    <insert id="insertVerifyCode"
+            parameterType="com.example.entity.VerifyCode"
+            useGeneratedKeys="true"
+            keyProperty="id"
+            keyColumn="id">
+        INSERT INTO verify_code (
+            email,
+            code,
+            expire_time,
+            create_time,
+            used
+        ) VALUES (
+                     #{email},
+                     #{code},
+                     #{expireTime},
+                     #{createTime},
+                     #{used}
+                 )
+    </insert>
+
+    <!-- 2. 查询邮箱最新未使用且未过期的验证码 -->
+    <select id="selectUnusedCodeByEmail"
+            parameterType="java.lang.String"
+            resultMap="VerifyCodeResultMap">
+        SELECT
+            id,
+            email,
+            code,
+            expire_time,
+            create_time,
+            used
+        FROM verify_code
+        WHERE email = #{email}
+          AND used = 0
+          AND expire_time > NOW()
+        ORDER BY create_time DESC
+            LIMIT 1
+    </select>
+
+    <!-- 3. 更新验证码使用状态 -->
+    <update id="updateCodeUsedStatus">
+        UPDATE verify_code
+        SET used = #{used}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 4. 检查邮箱是否存在：返回数量（>0 即存在） -->
+    <select id="checkEmailExists"
+            parameterType="java.lang.String"
+            resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM verify_code
+        WHERE email = #{email}
+    </select>
+
+</mapper>

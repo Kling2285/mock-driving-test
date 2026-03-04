@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mapper.QuestionMapper">
+
+    <!-- 核心：补充 api_id 字段映射 -->
+    <resultMap id="QuestionResultMap" type="com.example.entity.Question">
+        <id column="id" property="id" />
+        <result column="api_id" property="apiId" /> <!-- 新增：API原始ID映射 -->
+        <result column="question" property="question" />
+        <result column="answer" property="answer" />
+        <result column="item1" property="item1" />
+        <result column="item2" property="item2" />
+        <result column="item3" property="item3" />
+        <result column="item4" property="item4" />
+        <result column="explains" property="explains" />
+        <result column="url" property="url" />
+        <result column="subject" property="subject" />
+        <result column="model" property="model" />
+        <result column="question_type" property="questionType" />
+    </resultMap>
+
+    <!-- 1. 批量插入题库数据（新增 api_id 字段） -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO question (
+        api_id, question, answer, item1, item2, item3, item4,
+        explains, url, subject, model, question_type
+        ) VALUES
+        <foreach collection="list" item="q" separator=",">
+            (
+            #{q.apiId}, #{q.question}, #{q.answer}, #{q.item1}, #{q.item2},
+            #{q.item3}, #{q.item4}, #{q.explains}, #{q.url},
+            #{q.subject}, #{q.model}, #{q.questionType}
+            )
+        </foreach>
+    </insert>
+
+    <!-- 2. 按科目+驾照类型删除旧题库 -->
+    <delete id="deleteBySubjectAndModel">
+        DELETE FROM question
+        WHERE subject = #{subject} AND model = #{model}
+    </delete>
+
+    <!-- 3. 按科目+驾照类型+题型查询题目 -->
+
+    <select id="selectBySubjectModelAndType" resultMap="QuestionResultMap">
+        SELECT
+        id, api_id, question, answer, item1, item2, item3, item4,
+        explains, url, subject, model, question_type
+        FROM question
+        WHERE 1=1
+        <if test="subject != null">
+            AND subject = #{subject}
+        </if>
+        <if test="model != null and model != ''">
+            AND UPPER(model) = UPPER(#{model})
+        </if>
+        <if test="questionType != null">
+            AND question_type = #{questionType}
+        </if>
+        LIMIT #{limit}
+    </select>
+
+    <!-- 4. 查询所有题目（补充 api_id） -->
+    <select id="findAll" resultMap="QuestionResultMap">
+        SELECT
+            id, api_id, question, answer, item1, item2, item3, item4,
+            explains, url, subject, model, question_type
+        FROM question
+    </select>
+
+    <!-- 5. 根据题目ID查询单条题目（补充 api_id） -->
+    <select id="findById" parameterType="Long" resultMap="QuestionResultMap">
+        SELECT
+            id, api_id, question, answer, item1, item2, item3, item4,
+            explains, url, subject, model, question_type
+        FROM question
+        WHERE id = #{id}
+    </select>
+
+    <!-- 6. 按科目+驾照类型查询题目（补充 api_id） -->
+    <select id="findBySubjectAndModel" resultMap="QuestionResultMap">
+        SELECT
+            id, api_id, question, answer, item1, item2, item3, item4,
+            explains, url, subject, model, question_type
+        FROM question
+        WHERE subject = #{subject}
+          AND model = #{model}
+    </select>
+
+    <!-- 7. 根据题目ID更新题目（可选：如需更新 api_id 可补充） -->
+    <update id="updateById" parameterType="com.example.entity.Question">
+        UPDATE question
+        SET
+        api_id = #{apiId}, <!-- 新增：可选更新API原始ID -->
+        question = #{question},
+        answer = #{answer},
+        item1 = #{item1},
+        item2 = #{item2},
+        item3 = #{item3},
+        item4 = #{item4},
+        explains = #{explains},
+        url = #{url},
+        subject = #{subject},
+        model = #{model},
+        question_type = #{questionType}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 8. 根据题目ID删除单条题目 -->
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM question WHERE id = #{id}
+    </delete>
+
+    <!-- 9. 根据apiID查询单条题目 -->
+    <select id="findBySubjectModelAndApiId" resultMap="QuestionResultMap">
+        SELECT
+            id, api_id, question, answer, item1, item2, item3, item4,
+            explains, url, subject, model, question_type
+        FROM question
+        WHERE subject = #{subject}
+          AND model = #{model}
+          AND api_id = #{apiId}
+    </select>
+
+</mapper>

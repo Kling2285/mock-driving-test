@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mapper.ExamRecordMapper">
+
+    <resultMap id="ExamRecordResultMap" type="com.example.entity.ExamRecord">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="subject" property="subject"/>
+        <result column="model" property="model"/>
+        <result column="total_question" property="totalQuestion"/>
+        <result column="correct_count" property="correctCount"/>
+        <result column="error_count" property="errorCount"/>
+        <result column="score" property="score"/>
+        <result column="is_pass" property="isPass"/>
+        <result column="exam_time" property="examTime"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.entity.ExamRecord"  useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO exam_record (
+            user_id, subject, model, total_question,
+            correct_count, error_count, score, is_pass,
+            exam_time, create_time
+        ) VALUES (
+                     #{userId}, #{subject}, #{model}, #{totalQuestion},
+                     #{correctCount}, #{errorCount}, #{score}, #{isPass},
+                     #{examTime}, #{createTime}
+                 )
+    </insert>
+
+
+    <select id="findById" parameterType="Long" resultMap="ExamRecordResultMap">
+        SELECT
+            id, user_id, subject, model, total_question,
+            correct_count, error_count, score, is_pass,
+            exam_time, create_time
+        FROM exam_record
+        WHERE id = #{id}
+    </select>
+
+    <update id="updateById" parameterType="com.example.entity.ExamRecord">
+        UPDATE exam_record
+        SET
+            user_id = #{userId},
+            subject = #{subject},
+            model = #{model},
+            total_question = #{totalQuestion},
+            correct_count = #{correctCount},
+            error_count = #{errorCount},
+            score = #{score},
+            is_pass = #{isPass},
+            exam_time = #{examTime},
+            create_time = #{createTime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM exam_record WHERE id = #{id}
+    </delete>
+
+    <select id="findByUserId" parameterType="Long" resultMap="ExamRecordResultMap">
+        SELECT
+            id, user_id, subject, model, total_question,
+            correct_count, error_count, score, is_pass,
+            exam_time, create_time
+        FROM exam_record
+        WHERE user_id = #{userId}
+        ORDER BY exam_time DESC
+    </select>
+
+    <select id="findByUserIdSubjectAndModel" resultMap="ExamRecordResultMap">
+        SELECT
+            id, user_id, subject, model, total_question,
+            correct_count, error_count, score, is_pass,
+            exam_time, create_time
+        FROM exam_record
+        WHERE user_id = #{userId}
+          AND subject = #{subject}
+          AND model = #{model}
+        ORDER BY exam_time DESC
+    </select>
+
+    <select id="countTotalByUserIdAndSubject" resultType="Integer">
+        SELECT COUNT(*)
+        FROM exam_record
+        WHERE user_id = #{userId}
+          AND subject = #{subject}
+    </select>
+
+    <select id="countMaxScoreByUserIdAndSubject" resultType="Integer">
+        SELECT MAX(score)
+        FROM exam_record
+        WHERE user_id = #{userId}
+          AND subject = #{subject}
+    </select>
+
+    <select id="countPassedByUserIdAndSubject" resultType="Integer">
+        SELECT COUNT(*)
+        FROM exam_record
+        WHERE user_id = #{userId}
+          AND subject = #{subject}
+          AND is_pass = 1
+    </select>
+
+    <select id="findLatestByUserId" resultMap="ExamRecordResultMap">
+        SELECT
+            id, user_id, subject, model, total_question,
+            correct_count, error_count, score, is_pass,
+            exam_time, create_time
+        FROM exam_record
+        WHERE user_id = #{userId}
+        ORDER BY exam_time DESC
+            LIMIT 1
+    </select>
+
+    <select id="findListByCondition" resultMap="ExamRecordResultMap">
+        SELECT
+        id, user_id, subject, model, total_question,
+        correct_count, error_count, score, is_pass,
+        exam_time, create_time
+        FROM exam_record
+        WHERE 1=1
+        <if test="userId != null">
+            AND user_id = #{userId}
+        </if>
+        <if test="subject != null">
+            AND subject = #{subject}
+        </if>
+        <if test="model != null and model != ''">
+            AND model = #{model}
+        </if>
+        <if test="isPass != null">
+            AND is_pass = #{isPass}
+        </if>
+        ORDER BY exam_time DESC
+    </select>
+
+    <select id="findByPage" resultMap="ExamRecordResultMap">
+        SELECT
+        id, user_id, subject, model, total_question,
+        correct_count, error_count, score, is_pass,
+        exam_time, create_time
+        FROM exam_record
+        WHERE 1=1
+        <if test="userId != null">
+            AND user_id = #{userId}
+        </if>
+        <if test="subject != null">
+            AND subject = #{subject}
+        </if>
+        <if test="model != null and model != ''">
+            AND model = #{model}
+        </if>
+        <if test="isPass != null">
+            AND is_pass = #{isPass}
+        </if>
+        ORDER BY exam_time DESC
+        LIMIT #{startIndex}, #{pageSize}
+    </select>
+
+    <select id="countTotalByCondition" resultType="Integer">
+        SELECT COUNT(*)
+        FROM exam_record
+        WHERE 1=1
+        <if test="userId != null">
+            AND user_id = #{userId}
+        </if>
+        <if test="subject != null">
+            AND subject = #{subject}
+        </if>
+        <if test="model != null and model != ''">
+            AND model = #{model}
+        </if>
+        <if test="isPass != null">
+            AND is_pass = #{isPass}
+        </if>
+    </select>
+
+</mapper>

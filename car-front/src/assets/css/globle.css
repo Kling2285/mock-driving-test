@@ -1,0 +1,27 @@
+
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    padding: 0;
+    color: #333;
+    font-size: 16px;
+}
+a {
+    text-decoration: none;
+}
+.box{
+    background-color: #ffffff;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    padding: 10px;
+}
+
+div.title{
+    font-size: 25px;
+    font-weight: lighter;
+    margin: 15px 0px;
+    padding: 10px 0px;
+    border-bottom: 1px solid #eeeeee;
+}

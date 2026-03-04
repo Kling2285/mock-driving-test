@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!-- 1. 配置环境（Spring 已接管数据源，这里可省略，仅留基础配置） -->
+    <settings>
+        <!-- 开启驼峰命名自动转换（比如数据库 user_name → 实体类 userName） -->
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+        <!-- 开启日志（方便调试 SQL） -->
+        <setting name="logImpl" value="SLF4J"/>
+    </settings>
+
+    <!-- 2. 配置实体类别名（简化 Mapper.xml 中的类名） -->
+    <typeAliases>
+        <package name="com.example.entity"/>
+    </typeAliases>
+</configuration>

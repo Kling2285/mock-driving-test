@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.mapper.ErrorQuestionMapper">
+
+    <resultMap id="ErrorQuestionResultMap" type="com.example.entity.ErrorQuestion">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="api_id" property="apiId"/>
+        <result column="subject" property="subject"/>
+        <result column="model" property="model"/>
+        <result column="user_answer" property="userAnswer"/>
+        <result column="correct_answer" property="correctAnswer"/>
+        <result column="answer_time" property="answerTime"/>
+        <result column="exam_record_id" property="examRecordId"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.example.entity.ErrorQuestion">
+        INSERT IGNORE INTO error_question (
+        user_id, api_id, subject, model,
+        user_answer, correct_answer, answer_time,
+        exam_record_id,
+        create_time
+        ) VALUES (
+        #{userId}, #{apiId}, #{subject}, #{model},
+        #{userAnswer}, #{correctAnswer}, #{answerTime},
+        #{examRecordId},
+        #{createTime}
+        )
+    </insert>
+
+    <select id="findById" parameterType="Long" resultMap="ErrorQuestionResultMap">
+        SELECT
+        id, user_id, api_id, subject, model,
+        user_answer, correct_answer, answer_time,
+        exam_record_id,
+        create_time
+        FROM error_question
+        WHERE id = #{id}
+    </select>
+
+    <update id="updateById" parameterType="com.example.entity.ErrorQuestion">
+        UPDATE error_question
+        SET
+        user_id = #{userId},
+        api_id = #{apiId},
+        subject = #{subject},
+        model = #{model},
+        user_answer = #{userAnswer},
+        correct_answer = #{correctAnswer},
+        answer_time = #{answerTime},
+        exam_record_id = #{examRecordId},
+        create_time = #{createTime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        DELETE FROM error_question WHERE id = #{id}
+    </delete>
+
+    <select id="findByUserId" parameterType="Long" resultMap="ErrorQuestionResultMap">
+        SELECT
+        id, user_id, api_id, subject, model,
+        user_answer, correct_answer, answer_time,
+        exam_record_id,
+        create_time
+        FROM error_question
+        WHERE user_id = #{userId}
+        ORDER BY answer_time DESC
+    </select>
+
+    <select id="findByUserIdSubjectAndModel" resultMap="ErrorQuestionResultMap">
+        SELECT
+        id, user_id, api_id, subject, model,
+        user_answer, correct_answer, answer_time,
+        exam_record_id,
+        create_time
+        FROM error_question
+        WHERE user_id = #{userId}
+        AND subject = #{subject}
+        AND model = #{model}
+        ORDER BY answer_time DESC
+    </select>
+
+    <select id="countByUserIdAndSubject" resultType="Integer">
+        SELECT COUNT(*)
+        FROM error_question
+        WHERE user_id = #{userId}
+          AND subject = #{subject}
+    </select>
+
+    <!-- 联表查询：根据用户ID获取「错题+题目详情」列表（修正后，新增examRecordId） -->
+    <select id="findErrorQuestionWithQuestionByUserId" resultType="com.example.vo.ErrorQuestionWithQuestionVO">
+        SELECT
+        eq.id AS id,
+        eq.user_id AS userId,
+        eq.api_id AS apiId,
+        eq.subject AS subject,
+        eq.model AS model,
+        eq.user_answer AS userAnswer,
+        eq.correct_answer AS correctAnswer,
+        eq.answer_time AS answerTime,
+        eq.exam_record_id AS examRecordId,
+        eq.create_time AS createTime,
+        q.question AS questionContent,
+        q.item1 AS optionA,
+        q.item2 AS optionB,
+        q.item3 AS optionC,
+        q.item4 AS optionD,
+        q.explains AS analysis,
+        q.url AS questionUrl,
+        q.question_type AS questionType
+        FROM
+        error_question eq
+        INNER JOIN
+        question q
+        ON
+        eq.subject = q.subject
+        AND eq.model = q.model
+        AND eq.api_id = CAST(q.api_id AS CHAR)
+        WHERE
+        eq.user_id = #{userId}
+        ORDER BY
+        eq.create_time DESC
+    </select>
+
+    <!-- 联表查询：根据用户ID+科目+驾照类型获取「错题+题目详情」列表（修正后，新增examRecordId） -->
+    <select id="findErrorQuestionWithQuestionByUserIdSubjectAndModel" resultType="com.example.vo.ErrorQuestionWithQuestionVO">
+        SELECT
+        -- 错题表字段
+        eq.id AS id,
+        eq.user_id AS userId,
+        eq.api_id AS apiId,
+        eq.subject AS subject,
+        eq.model AS model,
+        eq.user_answer AS userAnswer,
+        eq.correct_answer AS correctAnswer,
+        eq.answer_time AS answerTime,
+        eq.exam_record_id AS examRecordId,
+        eq.create_time AS createTime,
+        -- 题目表字段
+        q.question AS questionContent,
+        q.item1 AS optionA,
+        q.item2 AS optionB,
+        q.item3 AS optionC,
+        q.item4 AS optionD,
+        q.explains AS analysis,
+        q.url AS questionUrl,
+        q.question_type AS questionType
+        FROM
+        error_question eq
+        INNER JOIN
+        question q
+        ON
+        eq.subject = q.subject
+        AND eq.model = q.model
+        AND eq.api_id = CAST(q.api_id AS CHAR)
+        WHERE
+        eq.user_id = #{userId}
+        AND eq.subject = #{subject}
+        AND eq.model = #{model}
+        ORDER BY
+        eq.create_time DESC
+    </select>
+
+
+    <select id="findErrorQuestionWithQuestionByExamRecordId" resultType="com.example.vo.ErrorQuestionWithQuestionVO">
+        SELECT
+            -- 错题表字段（包含 examRecordId，用于关联）
+            eq.id AS id,
+            eq.user_id AS userId,
+            eq.api_id AS apiId,
+            eq.subject AS subject,
+            eq.model AS model,
+            eq.user_answer AS userAnswer,
+            eq.correct_answer AS correctAnswer,
+            eq.answer_time AS answerTime,
+            eq.exam_record_id AS examRecordId,
+            eq.create_time AS createTime,
+            -- 题目表字段（关联查询题目详情）
+            q.question AS questionContent,
+            q.item1 AS optionA,
+            q.item2 AS optionB,
+            q.item3 AS optionC,
+            q.item4 AS optionD,
+            q.explains AS analysis,
+            q.url AS questionUrl,
+            q.question_type AS questionType
+        FROM
+            error_question eq
+                INNER JOIN
+            question q
+            ON
+                eq.subject = q.subject
+                    AND eq.model = q.model
+                    AND eq.api_id = CAST(q.api_id AS CHAR)
+        WHERE
+            eq.user_id = #{userId}
+          AND eq.subject = #{subject}
+          AND eq.model = #{model}
+          AND eq.exam_record_id = #{examRecordId} -- 核心条件：只查询该次考试的错题
+        ORDER BY
+            eq.create_time DESC
+    </select>
+</mapper>
